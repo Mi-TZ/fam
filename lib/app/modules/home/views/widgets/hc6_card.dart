@@ -1,69 +1,85 @@
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter/material.dart';
-import '../../../../core/utils/color_utils.dart';
 import '../../models/card_model.dart';
+import '../../models/entity_model.dart';
 
 class HC6CardDesign extends StatelessWidget {
-  final CardModel card; // No change here; still accepting a single CardModel
+  final CardModel card;
   final bool isScrollable;
 
   const HC6CardDesign({
-    Key? key,
-    required this.card, // Accepting a single CardModel
+    super.key,
+    required this.card,
     this.isScrollable = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     log(card.toString());
-    // Since we're only dealing with one card, we can directly build the widget for this single card.
     return isScrollable
         ? SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [_buildCard(context, card)], // Single card widget
-      ),
-    )
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [_buildCard(context, card)],
+            ),
+          )
         : Column(
-      children: [_buildCard(context, card)], // Single card widget
-    );
+            children: [_buildCard(context, card)],
+          );
   }
 
   Widget _buildCard(BuildContext context, CardModel card) {
-    return Card(
-      elevation: 0,
-      color: Color(int.parse(card.bgColor!.replaceFirst('#', '0xFF'))),
-      margin: const EdgeInsets.all(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        decoration: _buildBackgroundDecoration(card),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Leading Icon
-            card.bgImage != null
-                ? Image.network(
-              card.bgImage!.imageUrl!,
-              width: 30,
-              height: 30,
-            )
-                : Image.asset('assets/icons/hc6fallback.png', height: 30, width: 30,),
-            // Text in the middle
-            if (card.formattedTitle != null &&
-                card.formattedTitle!.entities.isNotEmpty)
-              _buildFormattedText(
-                card.formattedTitle!.entities[0],
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'met_semi_bold',
+    return InkWell(
+      onTap: () async {
+        final Uri url = Uri.parse(card.url!);
+        if (!await launchUrl(url)) {
+          throw Exception('Could not launch $url');
+        } else {
+          if (kDebugMode) {
+            print("No URL provided");
+          }
+        }
+      },
+      child: Card(
+        elevation: 0,
+        color: Color(int.parse(card.bgColor!.replaceFirst('#', '0xFF'))),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: _buildBackgroundDecoration(card),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Leading Icon
+              card.bgImage != null
+                  ? Image.network(
+                      card.bgImage!.imageUrl!,
+                      width: 30,
+                      height: 30,
+                    )
+                  : Image.asset(
+                      'assets/icons/hc6fallback.png',
+                      height: 30,
+                      width: 30,
+                    ),
+
+              if (card.formattedTitle != null &&
+                  card.formattedTitle!.entities.isNotEmpty)
+                _buildFormattedText(
+                  card.formattedTitle!.entities[0],
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'met_semi_bold',
+                ),
+
+              const SizedBox(
+                width: 100,
               ),
-
-            const SizedBox(height: 8),
-
-            // Arrow Icon
-            const Icon(Icons.arrow_forward_ios, size: 22),
-          ],
+              const Icon(Icons.arrow_forward_ios, size: 22),
+            ],
+          ),
         ),
       ),
     );
@@ -75,10 +91,9 @@ class HC6CardDesign extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-
           colors: List<Color>.from(
             card.bgGradient!.colors.map(
-                  (color) => Color(int.parse(color.replaceFirst('#', '0xFF'))),
+              (color) => Color(int.parse(color.replaceFirst('#', '0xFF'))),
             ),
           ),
         ),
@@ -93,6 +108,7 @@ class HC6CardDesign extends StatelessWidget {
     }
     return null;
   }
+
   Widget _buildFormattedText(EntityModel entity,
       {double? fontSize, FontWeight? fontWeight, String? fontFamily}) {
     return Text(
@@ -102,7 +118,7 @@ class HC6CardDesign extends StatelessWidget {
             ? Color(int.parse(entity.color!.replaceFirst('#', '0xFF')))
             : null,
         fontStyle:
-        entity.fontStyle == 'italic' ? FontStyle.italic : FontStyle.normal,
+            entity.fontStyle == 'italic' ? FontStyle.italic : FontStyle.normal,
         fontWeight: fontWeight ?? FontWeight.normal,
         fontSize: fontSize ?? entity.fontSize,
         fontFamily: fontFamily ?? entity.fontFamily,

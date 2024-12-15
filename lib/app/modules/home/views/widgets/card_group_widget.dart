@@ -26,11 +26,13 @@ class CardDesignFactory {
           if (typeCards.length > 1) {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
-              cardBuilder: (card) => HC9CardDesign(cardGroup: card),
-              height: 200,
+              cardBuilder: (card) => HC9CardDesign(
+                card: card,
+              ),
+              height: 195,
             ));
           } else {
-            cardWidgets.add(HC9CardDesign(cardGroup: typeCards.first));
+            cardWidgets.add(HC9CardDesign(card: typeCards.first));
           }
           break;
         case 'HC3':
@@ -39,25 +41,52 @@ class CardDesignFactory {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
               cardBuilder: (card) => AnimatedCard(card: card),
-              height: 250, // Adjust height as needed
+              height: 600, // Adjust height as needed
             ));
           } else {
             cardWidgets.add(AnimatedCard(card: typeCards.first));
           }
           break;
         case 'HC1':
-        // Check if there are multiple H C1 cards
           if (typeCards.length > 1) {
-            cardWidgets.add(_buildHorizontalCards(
-              cards: typeCards,
-              cardBuilder: (card) => HC1CardDesign(
-                card: card,
-                isInHorizontalScroll: true,
-              ),
-              height: 100, // Adjust height as needed
-            ));
+            if (typeCards.first.isScrollable == false) {
+              // When not scrollable and there are multiple cards, fit them in a row using Wrap
+              cardWidgets.add(Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.start,
+                children: typeCards.map((card) {
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cardWidth = (constraints.maxWidth - 16) / 2;
+                      return SizedBox(
+                        width: cardWidth,
+                        child: HC1CardDesign(
+                          card: card,
+                          isInHorizontalScroll: false,
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ));
+            } else {
+              // If scrollable, build a horizontal scroll view
+              cardWidgets.add(_buildHorizontalCards(
+                cards: typeCards,
+                cardBuilder: (card) => HC1CardDesign(
+                  card: card,
+                  isInHorizontalScroll: true,
+                ),
+                height: 90,
+              ));
+            }
           } else {
-            cardWidgets.add(HC1CardDesign(card: typeCards.first));
+            // Single card case
+            cardWidgets.add(HC1CardDesign(
+              card: typeCards.first,
+              isInHorizontalScroll: false,
+            ));
           }
           break;
 
@@ -67,7 +96,7 @@ class CardDesignFactory {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
               cardBuilder: (card) => HC5CardDesign(card: card),
-              height: 200, // Adjust height as needed
+              height: 200,
             ));
           } else {
             cardWidgets.add(HC5CardDesign(card: typeCards.first));
@@ -79,7 +108,7 @@ class CardDesignFactory {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
               cardBuilder: (card) => HC6CardDesign(card: card),
-              height: 200, // Adjust height as needed
+              height: 200,
             ));
           } else {
             cardWidgets.add(HC6CardDesign(card: typeCards.first));
@@ -94,8 +123,14 @@ class CardDesignFactory {
       }
     });
 
-    return ListView(
-      children: cardWidgets,
+    return ListView.separated(
+      itemCount: cardWidgets.length,
+      itemBuilder: (context, index) {
+        return cardWidgets[index];
+      },
+      separatorBuilder: (context, index) {
+        return const SizedBox(height: 10.0);
+      },
     );
   }
 
@@ -124,5 +159,5 @@ class CardDesignFactory {
 abstract class BaseCardDesign extends StatelessWidget {
   final CardModel card;
 
-  const BaseCardDesign({Key? key, required this.card}) : super(key: key);
+  const BaseCardDesign({super.key, required this.card});
 }

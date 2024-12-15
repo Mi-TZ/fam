@@ -1,45 +1,34 @@
+// Represents formatted text with multiple entities
+import 'entity_model.dart';
 
 class FormattedTextModel {
-  final String text;
-  final String align;
-  final List<EntityModel> entities;
+final String text;
+final String? align;
+final List<EntityModel> entities;
 
-  FormattedTextModel({
-    required this.text,
-    required this.align,
-    required this.entities,
-  });
+FormattedTextModel({
+required this.text,
+this.align,
+required this.entities,
+});
 
-  factory FormattedTextModel.fromJson(Map<String, dynamic> json) {
-    return FormattedTextModel(
-      text: json['text'],
-      align: json['align'],
-      entities: (json['entities'] as List<dynamic>)
-          .map((e) => EntityModel.fromJson(e))
-          .toList(),
-    );
-  }
+factory FormattedTextModel.fromJson(Map<String, dynamic> json) {
+return FormattedTextModel(
+text: json['text'] ?? '',
+align: json['align'],
+entities: json['entities'] != null
+? (json['entities'] as List)
+    .map((entity) => EntityModel.fromJson(entity))
+    .toList()
+    : [],
+);
 }
 
-class EntityModel {
-  final String text;
-  final String? color;
-  final String? url;
-  final String? fontStyle;
-
-  EntityModel({
-    required this.text,
-    this.color,
-    this.url,
-    this.fontStyle,
-  });
-
-  factory EntityModel.fromJson(Map<String, dynamic> json) {
-    return EntityModel(
-      text: json['text'],
-      color: json['color'],
-      url: json['url'],
-      fontStyle: json['font_style'],
-    );
-  }
+Map<String, dynamic> toJson() {
+return {
+'text': text,
+'align': align,
+'entities': entities.map((entity) => entity.toJson()).toList(),
+}..removeWhere((key, value) => value == null || value is List && value.isEmpty);
+}
 }

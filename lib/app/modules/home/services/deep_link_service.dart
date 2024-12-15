@@ -9,7 +9,6 @@ class DeepLinkService {
       if (await canLaunch(url)) {
         await launch(url);
       } else {
-        // Custom handling for specific deep link schemes
         if (url.startsWith('fp://')) {
           _handleFamPayDeepLink(url);
         } else {
@@ -22,10 +21,8 @@ class DeepLinkService {
   }
 
   static void _handleFamPayDeepLink(String url) {
-    // Add specific handling for FamPay deep links
     switch (url) {
       case 'fp://fampay.in/pay/':
-      // Navigate to specific screen or perform action
         print('Navigating to Pay Screen');
         break;
       default:

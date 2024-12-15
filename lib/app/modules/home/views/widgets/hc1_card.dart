@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/card_model.dart';
 import 'card_group_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HC1CardDesign extends BaseCardDesign {
   // Optional parameter to control width in horizontal scroll
@@ -9,29 +10,45 @@ class HC1CardDesign extends BaseCardDesign {
   const HC1CardDesign({
     Key? key,
     required CardModel card,
-    this.isInHorizontalScroll = false
+    required this.isInHorizontalScroll,
   }) : super(key: key, card: card);
 
   @override
   Widget build(BuildContext context) {
+    // Get screen width from MediaQuery
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
-      width: isInHorizontalScroll ? 250 : double.infinity, // Adjust width for horizontal scroll
+      width: isInHorizontalScroll ? 250 : screenWidth * 0.9, // Adjust width for horizontal scroll or 90% of screen width
+      height: card.height,
       margin: const EdgeInsets.symmetric(horizontal: 4), // Add some spacing between cards
-      child: Card(
-        elevation: 0,
-        color: Color(int.parse(card.bgColor!.replaceFirst('#', '0xFF'))),
-        margin: const EdgeInsets.all(8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // Use minimum space
-          children: [
-            // ListTile
-            ListTile(
-              leading: _buildLeadingIcon(),
-              title: _buildTitle(),
-              subtitle: _buildSubtitle(),
-              trailing: _buildTrailingCTA(),
-            ),
-          ],
+      child: InkWell(
+        onTap: () async {
+          final Uri _url = Uri.parse(card.url!);
+          if (!await launchUrl(_url)) {
+          throw Exception('Could not launch $_url');
+          }
+          else {
+            print("No URL provided");
+          }
+        },
+        child: Card(
+          elevation: 0,
+          color: Color(int.parse(card.bgColor!.replaceFirst('#', '0xFF'))),
+          margin: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ListTile
+              ListTile(
+                leading: _buildLeadingIcon(),
+                title: _buildTitle(context),
+                subtitle: _buildSubtitle(context),
+                trailing: _buildTrailingCTA(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -41,21 +58,26 @@ class HC1CardDesign extends BaseCardDesign {
     return card.icon?.imageUrl != null
         ? Image.network(
       card.icon!.imageUrl!,
-      width: 30,
-      height: 30,
+      width: 35,
+      height: 35,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         return Image.asset(
           'assets/icons/hc1fallback.png', // Fallback image from assets
-          width: 30,
-          height: 30,
+          width: 35,
+          height: 35,
           fit: BoxFit.cover,
         );
       },
     )
         : null;
   }
-  Widget _buildTitle() {
+
+  Widget _buildTitle(BuildContext context) {
+    // Use MediaQuery to adjust font size based on screen size
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth > 600 ? 18 : 14; // Increase font size on larger screens
+
     if (card.formattedTitle != null) {
       // If there are entities, use the first entity's text
       if (card.formattedTitle!.entities.isNotEmpty) {
@@ -68,18 +90,30 @@ class HC1CardDesign extends BaseCardDesign {
             fontStyle: card.formattedTitle!.entities.first.fontStyle == 'italic'
                 ? FontStyle.italic
                 : FontStyle.normal,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
           ),
         );
       }
       // Fallback to formatted title text
-      return Text(card.formattedTitle!.text);
+      return Text(
+        card.formattedTitle!.text,
+        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
+      );
     }
 
     // Fallback to regular title or name
-    return Text(card.title ?? card.name);
+    return Text(
+      card.title ?? card.name,
+      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
+    );
   }
 
-  Widget? _buildSubtitle() {
+  Widget? _buildSubtitle(BuildContext context) {
+    // Use MediaQuery to adjust font size based on screen size
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth > 600 ? 16 : 14; // Slightly larger subtitle for bigger screens
+
     // Prefer formatted description, then fallback to regular description
     if (card.formattedDescription != null) {
       // If there are entities, use the first entity's text
@@ -90,15 +124,25 @@ class HC1CardDesign extends BaseCardDesign {
             color: card.formattedDescription!.entities.first.color != null
                 ? Color(int.parse(card.formattedDescription!.entities.first.color!.replaceFirst('#', '0xFF')))
                 : null,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w400,
           ),
         );
       }
       // Fallback to formatted description text
-      return Text(card.formattedDescription!.text);
+      return Text(
+        card.formattedDescription!.text,
+        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w400),
+      );
     }
 
     // Fallback to regular description
-    return card.description != null ? Text(card.description!) : null;
+    return card.description != null
+        ? Text(
+      card.description!,
+      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w400),
+    )
+        : null;
   }
 
   Widget? _buildTrailingCTA() {

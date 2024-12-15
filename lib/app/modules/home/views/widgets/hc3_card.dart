@@ -2,6 +2,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/card_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../models/entity_model.dart';
 
 class AnimatedCard extends StatefulWidget {
   final CardModel card;
@@ -13,43 +16,39 @@ class AnimatedCard extends StatefulWidget {
 }
 
 class _AnimatedCardState extends State<AnimatedCard> {
-  final _isExpanded = false.obs;
+  final RxBool _isExpanded = false.obs;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: _toggleCard,
       child: Container(
-        height: widget.card.height,
         decoration: BoxDecoration(
-          color: Colors.white, // Grey background
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
-        margin: const EdgeInsets.all(8), // Optional margin for spacing
-        child: Row(
+        child: Obx(() => Row(
           children: [
             // Button Section
-            Obx(() => AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
-                  width: _isExpanded.value ? 150 : 0, // Button container width
-                  height: 270,
-                  child: _buildButtons(),
-                )),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+              width: _isExpanded.value
+                  ? MediaQuery.of(context).size.width * 0.35
+                  : 0,
+              child: _buildButtons(),
+            ),
             // Card Content Section
             Expanded(
-              child: Obx(() => AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                    width: _isExpanded.value
-                        ? MediaQuery.of(context).size.width - 80
-                        : MediaQuery.of(context).size.width,
-                    height: 270,
-                    child: HC3CardDesign(card: widget.card),
-                  )),
+              child: AnimatedContainer(
+
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+                child: HC3CardDesign(card: widget.card, isExpanded: _isExpanded),
+              ),
             ),
           ],
-        ),
+        )),
       ),
     );
   }
@@ -62,57 +61,61 @@ class _AnimatedCardState extends State<AnimatedCard> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Edit button
         InkWell(
-          onTap: () {
-            log('Delete button clicked');
-          },
+          onTap: () => log('Remind later clicked'),
           child: Container(
             height: 72,
-            width: 59,
-            padding: EdgeInsets.all(12),
+            width: 89,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
-              color: Color(0xffF7F6F3), // Background color of the button
+              color: const Color(0xffF7F6F3),
             ),
             child: Column(
               children: [
-                Image.asset('assets/icons/bell.png', height: 20.24, width: 17.51,),
-                const Text(
-                  'remind later',
-                  style: TextStyle(color: Color(0xff000000), fontSize: 8),
+                const SizedBox(height: 5),
+                Image.asset(
+                  'assets/icons/bell.png',
+                  height: 20,
+                  width: 17,
                 ),
-
+                const SizedBox(height: 5),
+                const Text(
+                  'Remind later',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),
+                ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 20), // Space between buttons
-        // Delete button
+        const SizedBox(height: 20),
         InkWell(
-          onTap: () {
-            log('Delete button clicked');
-          },
+          onTap: () => log('Dismiss now clicked'),
           child: Container(
             height: 72,
-            width: 59,
-            padding: EdgeInsets.all(8),
+            width: 89,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
-              color: Color(0xffF7F6F3), // Background color of the button
+              color: const Color(0xffF7F6F3),
             ),
             child: Column(
               children: [
-                Image.asset('assets/icons/cross.png', height: 20.24, width: 17.51,),
-                const Text(
-                  'dismiss now',
-                  style: TextStyle(color: Color(0xff000000), fontSize: 8),
+                const SizedBox(height: 5),
+                Image.asset(
+                  'assets/icons/cross.png',
+                  height: 20,
+                  width: 17,
                 ),
-
+                const SizedBox(height: 5),
+                const Text(
+                  'Dismiss now',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),
+                ),
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -120,89 +123,90 @@ class _AnimatedCardState extends State<AnimatedCard> {
 
 class HC3CardDesign extends StatelessWidget {
   final CardModel card;
+  final RxBool isExpanded;
 
-  const HC3CardDesign({Key? key, required this.card}) : super(key: key);
+  const HC3CardDesign({super.key, required this.card, required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: card.height,
-      child: Container(
+    return SingleChildScrollView(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          color: card.bgImage == null
-              ? Colors.transparent
-              : const Color(0xff454AA6),
+          image: card.bgImage != null
+              ? DecorationImage(
+            image: NetworkImage(card.bgImage!.imageUrl!),
+            fit: BoxFit.fill,
+            onError: (error, stackTrace) {
+              log('Error loading background image: $error');
+            },
+          )
+              : null, // No background image if card.bgImage is null
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Stack(
-          children: [
-            // Card Content
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Background Image
-                  if (card.bgImage != null)
-                    Image.network(
-                      card.bgImage!.imageUrl!,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.network(
-                          'https://github.com/Mi-TZ/fam/blob/main/famfallback.png?raw=true',
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-
-                  // Title from Entities
-                  if (card.formattedTitle != null &&
-                      card.formattedTitle!.entities.isNotEmpty)
-                    _buildFormattedText(
-                      card.formattedTitle!.entities[0],
+      
+        child: Padding(
+          padding: const EdgeInsets.only(left: 32, bottom: 16, right: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(height: 170),
+              if (card.formattedTitle != null &&
+                  card.formattedTitle!.entities.isNotEmpty) ...[
+                _buildFormattedText(
+                  card.formattedTitle!.entities[0],
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'met_semi_bold',
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.001),
+                Text(
+                  card.formattedTitle!.text.replaceAll(RegExp(r'[{}\n]'), ''),
+                  style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'met_semi_bold',
+                      color: Colors.white),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.06),
+                if (card.formattedTitle!.entities.length > 1)
+                  _buildFormattedText(
+                    card.formattedTitle!.entities[1],
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'met_regular',
+                  ),
+              ],
+              SizedBox(height: MediaQuery.of(context).size.height * 0.06),
+              if (card.cta != null && card.cta!.isNotEmpty && !isExpanded.value)
+                ElevatedButton(
+                  onPressed: () async {
+                    final Uri url = Uri.parse(card.url!);
+      
+                    if (!await launchUrl(url)) {
+                      throw Exception('Could not launch $url');
+                    }
+      
+                    log('HC3 Card CTA: ${card.cta!.first.text}');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
                     ),
-
-                  const SizedBox(height: 8),
-
-                  // Description from Entities
-                  if (card.formattedTitle != null &&
-                      card.formattedTitle!.entities.length > 1)
-                    _buildFormattedText(
-                      card.formattedTitle!.entities[1],
-                      fontSize: 16,
-                      fontFamily: 'met_regular',
+                    minimumSize: const Size(128, 42),
+                  ),
+                  child: Text(
+                    card.cta!.first.text,
+                    style: const TextStyle(
+                      color: Colors.white,
                     ),
-
-                  const SizedBox(height: 8),
-
-                  // CTA Button
-                  if (card.cta != null && card.cta!.isNotEmpty)
-                    ElevatedButton(
-                      onPressed: () {
-                        // Implement CTA action
-                        log('HC3 Card CTA: ${card.cta!.first.text}');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                      ),
-                      child: Text(
-                        card.cta!.first.text,
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -217,7 +221,7 @@ class HC3CardDesign extends StatelessWidget {
             ? Color(int.parse(entity.color!.replaceFirst('#', '0xFF')))
             : null,
         fontStyle:
-            entity.fontStyle == 'italic' ? FontStyle.italic : FontStyle.normal,
+        entity.fontStyle == 'italic' ? FontStyle.italic : FontStyle.normal,
         fontWeight: fontWeight ?? FontWeight.normal,
         fontSize: fontSize ?? entity.fontSize,
         fontFamily: fontFamily ?? entity.fontFamily,
@@ -225,3 +229,4 @@ class HC3CardDesign extends StatelessWidget {
     );
   }
 }
+

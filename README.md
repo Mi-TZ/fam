@@ -11,9 +11,11 @@ This Flutter project is a standalone container that displays a dynamic list of *
 
 ## Screenshots
 
-![Screenshot 1](assets/screenshots/Screenshot_20241215_191620.jpg)
-![Screenshot 2](assets/screenshots/Screenshot_20241215_191622.jpg)
-![Screenshot 3](assets/screenshots/Screenshot_20241215_191636.jpg)
+<div style="display: flex; justify-content: center; gap: 10px;">
+  <img src="assets/screenshots/Screenshot_20241215_191620.jpg" alt="Screenshot 1" style="width: 30%; height: auto;">
+  <img src="assets/screenshots/Screenshot_20241215_191622.jpg" alt="Screenshot 2" style="width: 30%; height: auto;">
+  <img src="assets/screenshots/Screenshot_20241215_191636.jpg" alt="Screenshot 3" style="width: 30%; height: auto;">
+</div>
 
 ## Screen Recording
 

@@ -21,6 +21,9 @@ This Flutter project is a standalone container that displays a dynamic list of *
 
 [Screen Recording](assets/screenshots/Screenrecording_20241215_191539.mp4)
 
+## Apk File
+
+[Apk](app-release.apk)
 
 ## Directory Structure
 

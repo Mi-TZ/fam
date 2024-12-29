@@ -1,10 +1,11 @@
 import 'dart:developer';
+import 'package:fam_assignment/app/core/utils/build_formatted_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter/material.dart';
-import '../../models/card_model.dart';
-import '../../models/entity_model.dart';
+
+import '../../../services/models/card_model.dart';
 
 class HC6CardDesign extends StatelessWidget {
   final CardModel card;
@@ -18,7 +19,6 @@ class HC6CardDesign extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log(card.toString());
     return isScrollable
         ? SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -53,29 +53,31 @@ class HC6CardDesign extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Leading Icon
-              card.bgImage != null
-                  ? Image.network(
-                      card.bgImage!.imageUrl!,
-                      width: 30,
-                      height: 30,
-                    )
-                  : Image.asset(
-                      'assets/icons/hc6fallback.png',
-                      height: 30,
-                      width: 30,
+              Row(
+                children: [
+                  card.bgImage != null
+                      ? Image.network(
+                          card.bgImage!.imageUrl!,
+                          width: 30,
+                          height: 30,
+                        )
+                      : Image.asset(
+                          'assets/icons/hc6fallback.png',
+                          height: 30,
+                          width: 30,
+                        ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  if (card.formattedTitle != null &&
+                      card.formattedTitle!.entities.isNotEmpty)
+                    BuildFormattedText(
+                      entity: card.formattedTitle!.entities[0],
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'met_semi_bold',
                     ),
-
-              if (card.formattedTitle != null &&
-                  card.formattedTitle!.entities.isNotEmpty)
-                _buildFormattedText(
-                  card.formattedTitle!.entities[0],
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'met_semi_bold',
-                ),
-
-              const SizedBox(
-                width: 100,
+                ],
               ),
               const Icon(Icons.arrow_forward_ios, size: 22),
             ],
@@ -107,22 +109,5 @@ class HC6CardDesign extends StatelessWidget {
       );
     }
     return null;
-  }
-
-  Widget _buildFormattedText(EntityModel entity,
-      {double? fontSize, FontWeight? fontWeight, String? fontFamily}) {
-    return Text(
-      entity.text,
-      style: TextStyle(
-        color: entity.color != null
-            ? Color(int.parse(entity.color!.replaceFirst('#', '0xFF')))
-            : null,
-        fontStyle:
-            entity.fontStyle == 'italic' ? FontStyle.italic : FontStyle.normal,
-        fontWeight: fontWeight ?? FontWeight.normal,
-        fontSize: fontSize ?? entity.fontSize,
-        fontFamily: fontFamily ?? entity.fontFamily,
-      ),
-    );
   }
 }

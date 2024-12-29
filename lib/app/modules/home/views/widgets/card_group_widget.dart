@@ -1,11 +1,11 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import '../../models/card_model.dart';
-import 'hc1_card.dart';
-import 'hc3_card.dart';
-import 'hc5_card.dart';
-import 'hc6_card.dart';
-import 'hc9_card.dart';
+import '../../services/models/card_model.dart';
+import 'hc1_card/hc1_card.dart';
+import 'hc3_card/animated_hc3_card.dart';
+import 'hc5_card/hc5_card.dart';
+import 'hc6_card/hc6_card.dart';
+import 'hc9_card/hc9_card.dart';
 
 class CardDesignFactory {
   static Widget createCardDesign(List<CardModel> cards) {
@@ -22,7 +22,7 @@ class CardDesignFactory {
     cardGroups.forEach((type, typeCards) {
       switch (type) {
         case 'HC9':
-          // If more than one HC9 card, create a horizontal scroll view
+        // If more than one HC9 card, create a horizontal scroll view
           if (typeCards.length > 1) {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
@@ -36,15 +36,15 @@ class CardDesignFactory {
           }
           break;
         case 'HC3':
-          // Check if the cards are scrollable
+        // Check if the cards are scrollable
           if (typeCards.first.isScrollable == true && typeCards.length > 1) {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
-              cardBuilder: (card) => AnimatedCard(card: card),
+              cardBuilder: (card) => AnimatedHC3Card(card: card),
               height: 600, // Adjust height as needed
             ));
           } else {
-            cardWidgets.add(AnimatedCard(card: typeCards.first));
+            cardWidgets.add(AnimatedHC3Card(card: typeCards.first));
           }
           break;
         case 'HC1':
@@ -91,7 +91,7 @@ class CardDesignFactory {
           break;
 
         case 'HC5':
-          // Check if the cards are scrollable
+        // Check if the cards are scrollable
           if (typeCards.first.isScrollable == true && typeCards.length > 1) {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,
@@ -103,7 +103,7 @@ class CardDesignFactory {
           }
           break;
         case 'HC6':
-          // Check if the cards are scrollable
+        // Check if the cards are scrollable
           if (typeCards.first.isScrollable == true && typeCards.length > 1) {
             cardWidgets.add(_buildHorizontalCards(
               cards: typeCards,

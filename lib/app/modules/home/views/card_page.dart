@@ -1,8 +1,6 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/card_controller.dart';
-import '../models/card_model.dart';
+import '../services/controllers/card_controller.dart';
 import 'widgets/card_group_widget.dart';
 
 class CardPage extends StatelessWidget {

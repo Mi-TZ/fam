@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/card_model.dart';
-import 'card_group_widget.dart';
+import '../../../services/models/card_model.dart';
+import '../card_group_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HC1CardDesign extends BaseCardDesign {
@@ -21,7 +21,7 @@ class HC1CardDesign extends BaseCardDesign {
     return Container(
       width: isInHorizontalScroll ? 250 : screenWidth * 0.9, // Adjust width for horizontal scroll or 90% of screen width
       height: card.height,
-      margin: const EdgeInsets.symmetric(horizontal: 4), // Add some spacing between cards
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       child: InkWell(
         onTap: () async {
           final Uri _url = Uri.parse(card.url!);
@@ -74,12 +74,10 @@ class HC1CardDesign extends BaseCardDesign {
   }
 
   Widget _buildTitle(BuildContext context) {
-    // Use MediaQuery to adjust font size based on screen size
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth > 600 ? 18 : 14; // Increase font size on larger screens
+    double fontSize = screenWidth > 600 ? 18 : 14;
 
     if (card.formattedTitle != null) {
-      // If there are entities, use the first entity's text
       if (card.formattedTitle!.entities.isNotEmpty) {
         return Text(
           card.formattedTitle!.entities.first.text,
@@ -95,14 +93,12 @@ class HC1CardDesign extends BaseCardDesign {
           ),
         );
       }
-      // Fallback to formatted title text
       return Text(
         card.formattedTitle!.text,
         style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
       );
     }
 
-    // Fallback to regular title or name
     return Text(
       card.title ?? card.name,
       style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
@@ -110,13 +106,10 @@ class HC1CardDesign extends BaseCardDesign {
   }
 
   Widget? _buildSubtitle(BuildContext context) {
-    // Use MediaQuery to adjust font size based on screen size
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth > 600 ? 16 : 14; // Slightly larger subtitle for bigger screens
 
-    // Prefer formatted description, then fallback to regular description
     if (card.formattedDescription != null) {
-      // If there are entities, use the first entity's text
       if (card.formattedDescription!.entities.isNotEmpty) {
         return Text(
           card.formattedDescription!.entities.first.text,
@@ -136,7 +129,6 @@ class HC1CardDesign extends BaseCardDesign {
       );
     }
 
-    // Fallback to regular description
     return card.description != null
         ? Text(
       card.description!,
@@ -151,7 +143,6 @@ class HC1CardDesign extends BaseCardDesign {
       final firstCTA = card.cta!.first;
       return ElevatedButton(
         onPressed: () {
-          // TODO: Implement proper navigation or action
           print('HC1 Card CTA: ${firstCTA.text}');
         },
         style: ElevatedButton.styleFrom(

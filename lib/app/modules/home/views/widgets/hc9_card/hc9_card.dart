@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../models/card_model.dart';
+import '../../../services/models/card_model.dart';
 
 
 class HC9CardDesign extends StatelessWidget {
